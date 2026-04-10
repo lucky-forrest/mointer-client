@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(findstr :8888)",
+      "Bash(taskkill /F /PID 38768)",
+      "Bash(taskkill /F /PID 18472)",
+      "Bash(taskkill //F //PID 38768)",
+      "Bash(taskkill //F //PID 18472)",
+      "Bash(taskkill //F //IM python.exe)",
+      "Read(//c/Users/52367/AppData/Local/Temp/claude/c--WorkSpace-mointer-client/a82563c1-cc2b-4b22-a283-38b47f8e021b/tasks/**)",
+      "Bash(ls -la *.py)",
+      "Bash(git rm:*)",
+      "Bash(wait)",
+      "Bash(timeout 5 bash -c 'python socket_server_v2.py 2>&1 & sleep 3 && python minimal_test.py; wait')",
+      "Bash(ls *.py)",
+      "Bash(wc -l *.md)"
+    ],
+    "additionalDirectories": [
+      "C:\\WorkSpace\\mointer-client",
+      "\\dev",
+      "c:\\WorkSpace\\mointer-client"
+    ]
+  }
+}

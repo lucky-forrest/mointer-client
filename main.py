@@ -8,6 +8,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
+import threading
+
+# 导入 Socket 服务端
+try:
+    from socket_server import SocketServerV2 as SocketServer
+    SocketServer_AVAILABLE = True
+except ImportError:
+    SocketServer_AVAILABLE = False
 
 
 class RecipeManagerApp:
@@ -55,6 +63,13 @@ class RecipeManagerApp:
 
         # 创建菜单
         self.create_menu()
+
+        # 检查 Socket 服务端是否可用
+        if SocketServer_AVAILABLE:
+            # 初始化 Socket 服务端
+            self.socket_server = SocketServer(host='0.0.0.0', port=8888)
+            self.socket_running = False
+            self.socket_thread = None
 
     def create_scrollable_container(self):
         """创建可滚动的容器"""
@@ -254,6 +269,14 @@ class RecipeManagerApp:
         edit_menu.add_command(label="重置", command=self.on_reset_click)
         edit_menu.add_separator()
         edit_menu.add_command(label="全选", command=self.on_select_all)
+
+        # 添加 Socket 服务端菜单项(如果可用)
+        if SocketServer_AVAILABLE:
+            socket_menu = tk.Menu(edit_menu, tearoff=0)
+            socket_menu.add_command(label="启动 Socket 服务端", command=self.on_start_socket)
+            socket_menu.add_command(label="停止 Socket 服务端", command=self.on_stop_socket, state=tk.DISABLED)
+            edit_menu.add_cascade(label="Socket 服务端", menu=socket_menu)
+
         menubar.add_cascade(label="编辑", menu=edit_menu)
 
         # 帮助菜单
@@ -346,6 +369,48 @@ class RecipeManagerApp:
         """关于对话框"""
         messagebox.showinfo("关于",
                           "配方管理客户端 v1.0\n\n基于 Python tkinter 开发\n仅供演示使用")
+
+    def on_start_socket(self):
+        """启动 Socket 服务端"""
+        if not SocketServer_AVAILABLE:
+            messagebox.showwarning("警告", "Socket 服务端模块不可用")
+            return
+
+        if self.socket_running:
+            messagebox.showinfo("提示", "Socket 服务端已经在运行中")
+            return
+
+        # 启动 Socket 服务端线程
+        self.socket_thread = threading.Thread(
+            target=self.run_socket_server,
+            daemon=True
+        )
+        self.socket_thread.start()
+        self.socket_running = True
+
+        messagebox.showinfo("成功", "Socket 服务端已启动,监听端口: 8888\n等待客户端连接...")
+
+    def on_stop_socket(self):
+        """停止 Socket 服务端"""
+        if not SocketServer_AVAILABLE:
+            messagebox.showwarning("警告", "Socket 服务端模块不可用")
+            return
+
+        if not self.socket_running:
+            messagebox.showinfo("提示", "Socket 服务端没有运行")
+            return
+
+        # 停止 Socket 服务端(通过设置运行标志)
+        self.socket_running = False
+
+        messagebox.showinfo("成功", "Socket 服务端已停止")
+
+    def run_socket_server(self):
+        """运行 Socket 服务端"""
+        try:
+            self.socket_server.start()
+        except Exception as e:
+            print(f"Socket 服务端运行错误: {e}")
 
     def update_status(self, message, color="black"):
         """更新状态标签"""
